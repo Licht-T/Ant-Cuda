@@ -413,6 +413,7 @@ __global__ void chemotaxis(){
                 ant->status = GOHOME;
                 ant->searchTime = 0;
                 ant->_foodNo = fNo;
+                ant->dir = left(left(left(dir)));
             }
         }
         __threadfence();
