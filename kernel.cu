@@ -401,7 +401,7 @@ __global__ void chemotaxis(){
 
         }
 
-        if( (cells_d[ant->i][ant->j].status&NEAR_FOOD)!=NORMAL_CELL 
+        if( (cells_d[ant->i][ant->j].status&NEAR_FOOD)!=NORMAL_CELL
                 &&  foods_d[  cells_d[ant->i][ant->j].foodNo  ].vol>=0.1
                 &&  (ant->status != GOHOME && ant->status != EMERGENCY) ){
             //atomicAdd(&(foods_d[  cells_d[ant->i][ant->j].foodNo  ].vol),-UNIT);
@@ -418,7 +418,7 @@ __global__ void chemotaxis(){
         }
         __threadfence();
 
-        if( (cells_d[ant->i][ant->j].status&NEAR_NEST)!=NORMAL_CELL 
+        if( (cells_d[ant->i][ant->j].status&NEAR_NEST)!=NORMAL_CELL
                 &&  (ant->status == GOHOME || ant->status == EMERGENCY)){
             if(ant->status == GOHOME){
                 ant->homing[ant->_foodNo]++;
@@ -731,8 +731,8 @@ __device__ __forceinline__ double distCandP(Cell a,double x,double y){
 
 __device__ __forceinline__ bool isOppositeDir(enum Direction nestDir,enum Direction dir){
     //If theta = 60 deg., this is OK.
-    if( (dir&nestDir)        !=NONE	
-            ||  (left(dir)&nestDir)  !=NONE 
+    if( (dir&nestDir)        !=NONE
+            ||  (left(dir)&nestDir)  !=NONE
             ||  (right(dir)&nestDir) !=NONE){
         return false;
     }
@@ -772,7 +772,7 @@ __host__ void reset(double sensor,int naho,unsigned long long int step){
     //setDistFromNest<<<MAX,MAX>>>();
 
     //setNestDirs<<<MAX,MAX>>>();
-    //setFoodsDir<<<NUM_FOODS,1>>>();	
+    //setFoodsDir<<<NUM_FOODS,1>>>();
 
     srand(RND_SEED+step);
 
