@@ -17,6 +17,7 @@ __device__ double degToRad(double a);
 __device__ double dist(Cell a,Cell b);
 __device__ double distCandP(Cell a,double x,double y);
 __device__ bool isOppositeDir(enum Direction nestDir,enum Direction dir);
+__device__ bool isOppositeDir(Cell& cell, enum Direction dir);
 __device__ double hilFunc(double x,double alpha);
 
 //Initializer
@@ -172,6 +173,78 @@ __global__ void setDistFromNest(){
     nest_c = &cells_d[NEST_Y][NEST_X];
     double d = dist(cells_d[i][j],*nest_c);
     cells_d[i][j].distFromNest = d;
+}
+
+__device__ double dot(Cartesian a, Cartesian b) {
+    return (a.x * b.x + a.y * b.y);
+}
+
+__device__ double cross(Cartesian a, Cartesian b) {
+    return (a.x * b.y - a.y * b.x);
+}
+
+__global__ void setCriticalAngle() {
+    const int i = threadIdx.x;
+    const int j = blockIdx.x;
+
+
+    cell_d[i][j].criticalAngle = NONE;
+
+    if( (cells_d[i][j].status&NEAR_NEST)!=NORMAL_CELL ){
+        return;
+    }
+
+    Cartesian c = cells_d[i][j].cart;
+    c.x = -c.x;
+    c.y = -c.y;
+
+    for(enum Direction dir = UP; dir<=UPLEFT; (dir<<=1) ) {
+        Cartesian d;
+
+        switch (dir) {
+            case UP:
+                d.x = 0;
+                d.y = 1;
+                break;
+            case UPRIGHT:
+                d.x = 1;
+                d.y = tan(M_PI/6);
+                break;
+            case LOWRIGHT:
+                d.x = 1;
+                d.y = -tan(M_PI/6);
+                break;
+            case LOW:
+                d.x = 0;
+                d.y = -1;
+                break;
+            case LOWLEFT:
+                d.x = -1;
+                d.y = -tan(M_PI/6);
+                break;
+            case UPLEFT:
+                d.x = -1;
+                d.y = tan(M_PI/6);
+                break;
+            default:
+                break;
+        }
+
+        double dotVal = dot(c,d);
+        if (dotVal<0){
+            cell_d[i][j].criticalAngle |= dir;
+        }
+        else{
+            double crossVal = cross(c,d);
+            double theta = atan2(cross, dot);
+
+            if ( !(-M_PI/3<=theta && theta<=M_PI/3) ){
+                cell_d[i][j].criticalAngle |= dir;
+            }
+        }
+    }
+
+
 }
 
 __global__ void setNestDirs(){
@@ -742,6 +815,43 @@ __device__ __forceinline__ bool isOppositeDir(enum Direction nestDir,enum Direct
     }
 }
 
+__device__ __forceinline__ bool isOppositeDir(Cell& cell, enum Direction dir){
+    if ( (cell.criticalAngle & dir)==dir ){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+__device__ __forceinline__ enum Direction selectNextDir(Cell& cell, enum Direction dir){
+    int rightCount = 0;
+    int leftCount  = 0;
+    for (enum Direction currentDir=right(dir); currentDir!=dir; currentDir=right(currentDir)){
+        if( (cell.criticalAngle & currentDir)!=currentDir ){
+            break;
+        }
+        rightCount++;
+    }
+
+    for (enum Direction currentDir=left(dir); currentDir!=dir; currentDir=left(currnetDir)){
+        if( (cell.criticalAngle & currentDir)!=currentDir ){
+            break;
+        }
+        leftCount++;
+    }
+
+    if ( rightCount < leftCount ){
+        return right(dir);
+    }
+    else if ( rightCount > leftCount ){
+        return left(dir);
+    }
+    else{
+        return NONE;
+    }
+}
+
 __device__ __forceinline__ double hilFunc(double x,double alpha){
     return pow(alpha*x+0.05,10);
 }
@@ -755,6 +865,8 @@ __host__ void initialize(){
     setEdges<<<MAX,MAX>>>();
     setNest<<<MAX,MAX>>>();
     setDistFromNest<<<MAX,MAX>>>();
+
+    setCriticalAngle<<<MAX,MAX>>>();
 
     setNestDirs<<<MAX,MAX>>>();
     setFoodsDir<<<NUM_FOODS,1>>>();
