@@ -314,10 +314,7 @@ __global__ void chemotaxis(){
         Cell *frontCell = getCell(cells_d,i,j,dir);
         Cell *rightCell = getCell(cells_d,i,j,right(dir));
 
-        if(
-                ant->searchTime>=MAX_SEARCH_TIME
-                && ant->status!=EMERGENCY
-          ){
+        if(ant->searchTime>=MAX_SEARCH_TIME && ant->status!=EMERGENCY){
             ant->status = EMERGENCY;
         }
 
