@@ -2,8 +2,8 @@ import os
 import subprocess
 
 make_cmd = "make"
-dists = [30]
-angles = [10]
+dists = [30, 40]
+angles = [80, 120]
 
 flag_win = False
 try:

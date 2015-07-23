@@ -9,7 +9,7 @@
 
 #define FOODSOURCE 10
 //#define FOODSOURCE 60
-#define NUM_FOODS 3
+#define NUM_FOODS 2
 //#define FOOD_DIST 45
 //#define FOOD_ANGLE 80
 
@@ -25,8 +25,8 @@
 //#define REC 0.3
 #define EVAPOLATION_CONST 0.01
 #define MAX_SEARCH_TIME 150
-#define MAX_STEP 10
-#define MAX_TIME 80000
+#define MAX_STEP 200
+#define MAX_TIME 40000
 #define OFFSET_TIME 0
 #define EMI 0.08
 #define ENEST 1.0
