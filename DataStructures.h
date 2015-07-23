@@ -116,6 +116,7 @@ typedef struct {
     enum CELLStatus status;
     enum Direction edge;
     enum Direction nestDir;
+    enum Direction criticalAngle;
     double phero;
     int foodNo;
     int i,j;
