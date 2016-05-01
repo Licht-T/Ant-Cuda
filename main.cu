@@ -34,17 +34,25 @@ int main(int argc, char *argv[]){
 
     double normalSum = 0.0;
 
+    /* for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){ */
+    /*     reset(pow(10,-3),50,dummy); */
+    /*     display(argc,argv); */
+    /*  */
+    /*     for(int t=0; t<MACRO_MAX_TIME; t++){ */
+    /*         calculation(); */
+    /*     } */
+    /* } */
+
     for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
         reset(1,0,dummy);
 
-        cudaDeviceSynchronize();
-        display(argc,argv);
+        // display(argc,argv);
 
         for(int t=0; t<MACRO_MAX_TIME; t++){
             calculation();
-            /* if(t%500==0){ */
-            /*     IOEffPoll(0,500,dummy,t); */
-            /* } */
+            // if(t%500==0){
+            //     IOEffPoll(0,500,dummy,t);
+            // }
         }
 
         normalSum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, homeOp, 0, binary_op);
@@ -63,7 +71,6 @@ int main(int argc, char *argv[]){
             for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
                 reset(sensor,naho,dummy);
 
-                display(argc,argv);
                 for(int t=1; t<=MACRO_MAX_TIME; t++){
                     calculation();
                     // if(t%500==0){
