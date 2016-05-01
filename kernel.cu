@@ -3,9 +3,9 @@
 __constant__ double SENSOR2;
 __constant__ int NAHO;
 
-__device__ int selectedCounts[NMAX];
-__device__ double tmpPhero_d[MAX][MAX];
-__device__ curandState rnd_state[NMAX];
+__device__ int selectedCounts[MACRO_NMAX];
+__device__ double tmpPhero_d[MACRO_MAX][MACRO_MAX];
+__device__ curandState rnd_state[MACRO_NMAX];
 
 //Misc
 __device__ bool isGotFood(Food& food);
@@ -18,6 +18,7 @@ __device__ double dist(Cell a,Cell b);
 __device__ double distCandP(Cell a,double x,double y);
 __device__ bool isOppositeDir(enum Direction nestDir,enum Direction dir);
 __device__ bool isOppositeDir(Cell& cell, enum Direction dir);
+__device__ enum Direction selectNextDir(Cell& cell, enum Direction dir);
 __device__ double hilFunc(double x,double alpha);
 
 //Initializer
@@ -40,19 +41,19 @@ __global__ void pheroUpdate();
 
 
 __host__ void calculation(){
-    naturalFoodDecrease<<<1,NUM_FOODS>>>();
-    evapolation<<<MAX,MAX>>>();
+    naturalFoodDecrease<<<1,MACRO_NUM_FOODS>>>();
+    evapolation<<<MACRO_MAX,MACRO_MAX>>>();
 
-    //sortKeyInit<<<1,NMAX>>>();
-    //thrust::sort_by_key(sort_key_d_ptr, sort_key_d_ptr + NMAX, ants_d_ptr);
+    //sortKeyInit<<<1,MACRO_NMAX>>>();
+    //thrust::sort_by_key(sort_key_d_ptr, sort_key_d_ptr + MACRO_NMAX, ants_d_ptr);
 
-    selectAnts<<<1,NMAX>>>();
-    chemotaxis<<<1,NMAX>>>();
-    //cudaMemcpyFromSymbol(cells,cells_d,MAX*MAX*sizeof(Cell),0);
+    selectAnts<<<1,MACRO_NMAX>>>();
+    chemotaxis<<<1,MACRO_NMAX>>>();
+    //cudaMemcpyFromSymbol(cells,cells_d,MACRO_MAX*MACRO_MAX*sizeof(Cell),0);
     //chemotaxis();
-    //cudaMemcpyToSymbol(cells_d,cells,MAX*MAX*sizeof(Cell),0);
-    diffusion<<<MAX,MAX>>>();
-    pheroUpdate<<<MAX,MAX>>>();
+    //cudaMemcpyToSymbol(cells_d,cells,MACRO_MAX*MACRO_MAX*sizeof(Cell),0);
+    diffusion<<<MACRO_MAX,MACRO_MAX>>>();
+    pheroUpdate<<<MACRO_MAX,MACRO_MAX>>>();
 }
 
 //Initialize
@@ -82,11 +83,11 @@ __global__ void randInit(){
 __global__ void antsReset(){
     const int id = threadIdx.x + blockIdx.x * blockDim.x;
     ants_d[id].status = FORAGE;
-    ants_d[id].i = NEST_Y;
-    ants_d[id].j = NEST_X;
+    ants_d[id].i = MACRO_NEST_Y;
+    ants_d[id].j = MACRO_NEST_X;
     ants_d[id].searchTime = 0;
     ants_d[id].dir = genDirRand(id);
-    for (int i=0; i<NUM_FOODS; i++){
+    for (int i=0; i<MACRO_NUM_FOODS; i++){
         ants_d[id].homing[i] = 0;
     }
     if(id<NAHO){
@@ -114,8 +115,8 @@ __global__ void cellsInit(){
     cells_d[i][j].j = j;
 
     //Cartesian initialize
-    cells_d[i][j].cart.x = (j-CART_X_ZERO)*(sqrt(3.0)/2.0);
-    cells_d[i][j].cart.y = (abs(j-CART_X_ZERO)%2)/2.0+(i-CART_Y_ZERO);
+    cells_d[i][j].cart.x = (j-MACRO_CART_X_ZERO)*(sqrt(3.0)/2.0);
+    cells_d[i][j].cart.y = (abs(j-MACRO_CART_X_ZERO)%2)/2.0+(i-MACRO_CART_Y_ZERO);
     //Edge initialize
     cells_d[i][j].edge = NONE;
 
@@ -129,15 +130,15 @@ __global__ void cellsInit(){
 __global__ void setEdges(){
     const int i = threadIdx.x;
     const int j = blockIdx.x;
-    if(i==MAX-1){ //For upper edge
+    if(i==MACRO_MAX-1){ //For upper edge
         cells_d[i][j].edge |= UP;
-        if(abs((j-CART_X_ZERO)%2)==1){
+        if(abs((j-MACRO_CART_X_ZERO)%2)==1){
             cells_d[i][j].edge |= (UPLEFT | UPRIGHT);
         }
     }
     else if(i==0){//For lower edge
         cells_d[i][j].edge |= LOW;
-        if(abs((j-CART_X_ZERO)%2)==0){
+        if(abs((j-MACRO_CART_X_ZERO)%2)==0){
             cells_d[i][j].edge |= LOWLEFT | LOWRIGHT;
         }
     }
@@ -145,7 +146,7 @@ __global__ void setEdges(){
     if(j==0){//For left edge
         cells_d[i][j].edge |= LEFT;
     }
-    else if(j==MAX-1){//For right edge
+    else if(j==MACRO_MAX-1){//For right edge
         cells_d[i][j].edge |= RIGHT;
     }
 }
@@ -155,11 +156,11 @@ __global__ void setNest(){
     const int j = blockIdx.x;
 
     Cell* c;
-    if(i==NEST_Y && j==NEST_X){
-        cells_d[NEST_Y][NEST_X].status |= NEST_CELL;
+    if(i==MACRO_NEST_Y && j==MACRO_NEST_X){
+        cells_d[MACRO_NEST_Y][MACRO_NEST_X].status |= NEST_CELL;
 
         for(enum Direction d = UP; d<=UPLEFT; (d<<=1) ){
-            c = getCell(cells_d,NEST_Y,NEST_X,d);
+            c = getCell(cells_d,MACRO_NEST_Y,MACRO_NEST_X,d);
             c->status |= NEST_NEIGHBOUR_CELL;
         }
     }
@@ -170,7 +171,7 @@ __global__ void setDistFromNest(){
     const int j = blockIdx.x;
 
     Cell *nest_c;
-    nest_c = &cells_d[NEST_Y][NEST_X];
+    nest_c = &cells_d[MACRO_NEST_Y][MACRO_NEST_X];
     double d = dist(cells_d[i][j],*nest_c);
     cells_d[i][j].distFromNest = d;
 }
@@ -188,15 +189,15 @@ __global__ void setCriticalAngle() {
     const int j = blockIdx.x;
 
 
-    cell_d[i][j].criticalAngle = NONE;
+    cells_d[i][j].criticalAngle = NONE;
 
     if( (cells_d[i][j].status&NEAR_NEST)!=NORMAL_CELL ){
         return;
     }
 
     Cartesian c = cells_d[i][j].cart;
-    c.x = -c.x;
-    c.y = -c.y;
+    c.x = -c.x/cells_d[i][j].distFromNest;
+    c.y = -c.y/cells_d[i][j].distFromNest;
 
     for(enum Direction dir = UP; dir<=UPLEFT; (dir<<=1) ) {
         Cartesian d;
@@ -208,11 +209,11 @@ __global__ void setCriticalAngle() {
                 break;
             case UPRIGHT:
                 d.x = 1;
-                d.y = tan(M_PI/6);
+                d.y = tan(M_PI/6.0);
                 break;
             case LOWRIGHT:
                 d.x = 1;
-                d.y = -tan(M_PI/6);
+                d.y = -tan(M_PI/6.0);
                 break;
             case LOW:
                 d.x = 0;
@@ -220,27 +221,22 @@ __global__ void setCriticalAngle() {
                 break;
             case LOWLEFT:
                 d.x = -1;
-                d.y = -tan(M_PI/6);
+                d.y = -tan(M_PI/6.0);
                 break;
             case UPLEFT:
                 d.x = -1;
-                d.y = tan(M_PI/6);
+                d.y = tan(M_PI/6.0);
                 break;
             default:
                 break;
         }
 
-        double dotVal = dot(c,d);
-        if (dotVal<0){
-            cell_d[i][j].criticalAngle |= dir;
-        }
-        else{
-            double crossVal = cross(c,d);
-            double theta = atan2(cross, dot);
+        d.x = d.x/sqrt(dot(d,d));
+        d.y = d.y/sqrt(dot(d,d));
 
-            if ( !(-M_PI/3<=theta && theta<=M_PI/3) ){
-                cell_d[i][j].criticalAngle |= dir;
-            }
+        double dotVal = dot(c,d);
+        if (dotVal<=0.5){
+            cells_d[i][j].criticalAngle |= dir;
         }
     }
 
@@ -261,7 +257,7 @@ __global__ void setNestDirs(){
 
 
         tmp=c->distFromNest;
-        if( fabs(tmp-d)<EPS ){
+        if( fabs(tmp-d)<MACRO_EPS ){
             cells_d[i][j].nestDir |= dir;
         }
         else if(tmp<d) {
@@ -273,7 +269,7 @@ __global__ void setNestDirs(){
 
 __global__ void foodsReset(){
     const int i = threadIdx.x + blockIdx.x * blockDim.x;
-    foods_d[i].vol = FOODSOURCE;
+    foods_d[i].vol = MACRO_FOODSOURCE;
 }
 
 __global__ void setFoodsDir(){
@@ -285,9 +281,9 @@ __global__ void setFoodsDir(){
     double x,y;
     x=FOOD_DIST * cos(i*dtheta);
     y=FOOD_DIST * sin(i*dtheta);
-    for(int j=0; j<MAX; j++){
-        for(int k=0; k<MAX; k++){
-            if(distCandP(cells_d[j][k],x,y)<=sqrt(3.0)/3.0+EPS){
+    for(int j=0; j<MACRO_MAX; j++){
+        for(int k=0; k<MACRO_MAX; k++){
+            if(distCandP(cells_d[j][k],x,y)<=sqrt(3.0)/3.0+MACRO_EPS){
                 nearCell = &cells_d[j][k];
                 break;
             }
@@ -347,7 +343,7 @@ __global__ void diffusion(){
     for (enum Direction dir = UP; dir<=UPLEFT; (dir<<=1) ){
         tmp += getCell(cells_d,i,j,dir)->phero;
     }
-    tmpPhero_d[i][j] = cells_d[i][j].phero+DIFFE*(tmp/6.0-cells_d[i][j].phero);
+    tmpPhero_d[i][j] = cells_d[i][j].phero+MACRO_DIFFE*(tmp/6.0-cells_d[i][j].phero);
 }
 
 __global__ void pheroUpdate(){
@@ -359,13 +355,13 @@ __global__ void pheroUpdate(){
 
 __global__ void naturalFoodDecrease(){
     const int id = threadIdx.x + blockIdx.x * blockDim.x;
-    foods_d[id].vol=foods_d[id].vol+REC-foods_d[id].vol*(REC/100.0);
+    foods_d[id].vol=foods_d[id].vol+MACRO_REC-foods_d[id].vol*(MACRO_REC/100.0);
 }
 
 __global__ void evapolation(){
     const int i = blockIdx.x;
     const int j = threadIdx.x;
-    cells_d[i][j].phero *= (1.0-EVAPOLATION_CONST);
+    cells_d[i][j].phero *= (1.0-MACRO_EVAPOLATION_CONST);
 }
 
 
@@ -388,14 +384,14 @@ __global__ void chemotaxis(){
         Cell *rightCell = getCell(cells_d,i,j,right(dir));
 
         if(
-                ant->searchTime>=MAX_SEARCH_TIME
+                ant->searchTime>=MACRO_MAX_SEARCH_TIME
                 && ant->status!=EMERGENCY
           ){
             ant->status = EMERGENCY;
         }
 
         if(ant->status==GOHOME){
-            atomicAdd(&(cells_d[i][j].phero),EMI*ENEST);
+            atomicAdd(&(cells_d[i][j].phero),MACRO_EMI*MACRO_ENEST);
         }
         __threadfence();
         if(ant->status==RANDOM_SEARCH){
@@ -409,12 +405,15 @@ __global__ void chemotaxis(){
             rightPhero = rightCell->phero;
         }
 
-        if( (ant->status==GOHOME || ant->status==EMERGENCY) && isOppositeDir(nestDir,dir)){
-            if(!isOppositeDir(nestDir,left(dir))){
+        if( (ant->status==GOHOME || ant->status==EMERGENCY) && isOppositeDir(cells_d[i][j], dir)){
+
+            enum Direction nextDir = selectNextDir(cells_d[i][j], dir);
+
+            if( nextDir == left(dir) ){
                 ant->dir = left(dir);
                 frontCell = leftCell;
             }
-            else if(!isOppositeDir(nestDir,right(dir))){
+            else if( nextDir == right(dir) ){
                 ant->dir = right(dir);
                 frontCell = rightCell;
             }
@@ -434,17 +433,17 @@ __global__ void chemotaxis(){
         else{
             double s1,s2,s3,s12,t,tot,rand;
             if(ant->ch == NORMAL_CH){
-                t = HIL_CONST;
+                t = MACRO_HIL_CONST;
             }
             else{
-                t = SENSOR2*HIL_CONST;
+                t = SENSOR2*MACRO_HIL_CONST;
             }
 
             s1=hilFunc(leftPhero,t);
             s2=hilFunc(frontPhero,t);
             s3=hilFunc(rightPhero,t);
             /*
-               if(s1<EPS && s2<EPS && s3<EPS){
+               if(s1<MACRO_EPS && s2<MACRO_EPS && s3<MACRO_EPS){
                s1=1.0;
                s2=1.0;
                s3=1.0;
@@ -478,7 +477,7 @@ __global__ void chemotaxis(){
         if( (cells_d[ant->i][ant->j].status&NEAR_FOOD)!=NORMAL_CELL
                 &&  foods_d[  cells_d[ant->i][ant->j].foodNo  ].vol>=0.1
                 &&  (ant->status != GOHOME && ant->status != EMERGENCY) ){
-            //atomicAdd(&(foods_d[  cells_d[ant->i][ant->j].foodNo  ].vol),-UNIT);
+            //atomicAdd(&(foods_d[  cells_d[ant->i][ant->j].foodNo  ].vol),-MACRO_UNIT);
             //ant->status = GOHOME;
             //ant->searchTime = 0;
             int fNo = cells_d[ant->i][ant->j].foodNo;
@@ -496,13 +495,13 @@ __global__ void chemotaxis(){
                 &&  (ant->status == GOHOME || ant->status == EMERGENCY)){
             if(ant->status == GOHOME){
                 ant->homing[ant->_foodNo]++;
-                //atomicAdd(&(cells_d[i][j].phero),EMI*ENEST);
+                //atomicAdd(&(cells_d[i][j].phero),MACRO_EMI*MACRO_ENEST);
             }
             ant->status = FORAGE;
             ant->searchTime = 0;
             ant->dir = genDirRand(id);
-            ant->i   = NEST_Y;
-            ant->j   = NEST_X;
+            ant->i   = MACRO_NEST_Y;
+            ant->j   = MACRO_NEST_X;
         }
     }
     selectedCounts[id] = 0;
@@ -600,7 +599,7 @@ __device__ __host__ __forceinline__ enum Direction right(enum Direction dir){
     }
 }
 
-__device__ __host__ __forceinline__ Cell* up(Cell cells[MAX][MAX],int i,int j){
+__device__ __host__ __forceinline__ Cell* up(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j){
     if( (cells[i][j].edge&UP)!=NONE ){
         return &cells[0][j];
     }
@@ -609,23 +608,23 @@ __device__ __host__ __forceinline__ Cell* up(Cell cells[MAX][MAX],int i,int j){
     }
 }
 
-__device__ __host__ __forceinline__ Cell* upright(Cell cells[MAX][MAX],int i,int j){
+__device__ __host__ __forceinline__ Cell* upright(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j){
     int ii,jj;
     if( (cells[i][j].edge&UPRIGHT)!=NONE ){
         jj = 0;
-        if(abs(j-CART_X_ZERO)%2==0){
+        if(abs(j-MACRO_CART_X_ZERO)%2==0){
             ii = i;
         }
         else{
             ii = i+1;
-            if(ii==MAX){
+            if(ii==MACRO_MAX){
                 ii = 0;
             }
         }
     }
     else{
         jj = j+1;
-        if(abs(j-CART_X_ZERO)%2==0){
+        if(abs(j-MACRO_CART_X_ZERO)%2==0){
             ii = i;
         }
         else{
@@ -635,16 +634,16 @@ __device__ __host__ __forceinline__ Cell* upright(Cell cells[MAX][MAX],int i,int
     return &cells[ii][jj];
 }
 
-__device__ __host__ __forceinline__ Cell* lowright(Cell cells[MAX][MAX],int i,int j){
+__device__ __host__ __forceinline__ Cell* lowright(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j){
 
     int ii,jj;
 
     if( (cells[i][j].edge&LOWRIGHT)!=NONE ){
         jj = 0;
-        if(abs(j-CART_X_ZERO)%2==0){
+        if(abs(j-MACRO_CART_X_ZERO)%2==0){
             ii = i-1;
             if(ii<0){
-                ii=MAX-1;
+                ii=MACRO_MAX-1;
             }
         }
         else{
@@ -653,7 +652,7 @@ __device__ __host__ __forceinline__ Cell* lowright(Cell cells[MAX][MAX],int i,in
     }
     else{
         jj = j+1;
-        if(abs(j-CART_X_ZERO)%2==0){
+        if(abs(j-MACRO_CART_X_ZERO)%2==0){
             ii = i-1;
         }
         else{
@@ -663,24 +662,24 @@ __device__ __host__ __forceinline__ Cell* lowright(Cell cells[MAX][MAX],int i,in
     return &cells[ii][jj];
 }
 
-__device__ __host__ __forceinline__ Cell* low(Cell cells[MAX][MAX],int i,int j){
+__device__ __host__ __forceinline__ Cell* low(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j){
     if( (cells[i][j].edge&LOW)!=NONE ){
-        return &cells[MAX-1][j];
+        return &cells[MACRO_MAX-1][j];
     }
     else{
         return &cells[i-1][j];
     }
 }
 
-__device__ __host__ __forceinline__ Cell* lowleft(Cell cells[MAX][MAX],int i,int j){
+__device__ __host__ __forceinline__ Cell* lowleft(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j){
     int ii,jj;
 
     if( (cells[i][j].edge&LOWLEFT)!=NONE ){
-        jj = MAX-1;
-        if(abs(j-CART_X_ZERO)%2==0){
+        jj = MACRO_MAX-1;
+        if(abs(j-MACRO_CART_X_ZERO)%2==0){
             ii = i-1;
             if(ii<0){
-                ii = MAX-1;
+                ii = MACRO_MAX-1;
             }
         }
         else{
@@ -689,7 +688,7 @@ __device__ __host__ __forceinline__ Cell* lowleft(Cell cells[MAX][MAX],int i,int
     }
     else{
         jj = j-1;
-        if(abs(j-CART_X_ZERO)%2==0){
+        if(abs(j-MACRO_CART_X_ZERO)%2==0){
             ii = i-1;
         }
         else{
@@ -699,24 +698,24 @@ __device__ __host__ __forceinline__ Cell* lowleft(Cell cells[MAX][MAX],int i,int
     return &cells[ii][jj];
 }
 
-__device__ __host__ __forceinline__ Cell* upleft(Cell cells[MAX][MAX],int i,int j){
+__device__ __host__ __forceinline__ Cell* upleft(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j){
     int ii,jj;
     if( (cells[i][j].edge&UPLEFT)!=NONE ){
-        jj = MAX-1;
+        jj = MACRO_MAX-1;
 
-        if(abs(j-CART_X_ZERO)%2==0){
+        if(abs(j-MACRO_CART_X_ZERO)%2==0){
             ii = i;
         }
         else{
             ii= i+1;
-            if(ii==MAX){
+            if(ii==MACRO_MAX){
                 ii=0;
             }
         }
     }
     else{
         jj = j-1;
-        if(abs(j-CART_X_ZERO)%2==0){
+        if(abs(j-MACRO_CART_X_ZERO)%2==0){
             ii = i;
         }
         else{
@@ -726,7 +725,7 @@ __device__ __host__ __forceinline__ Cell* upleft(Cell cells[MAX][MAX],int i,int 
     return &cells[ii][jj];
 }
 
-__device__ __host__ Cell* getCell(Cell cells[MAX][MAX],int i,int j, enum Direction dir){
+__device__ __host__ Cell* getCell(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j, enum Direction dir){
 
     switch (dir){
         case UP:
@@ -759,7 +758,7 @@ __device__ __forceinline__ bool isGotFood(Food& food){
         if(__longlong_as_double(assumed)<0.1){
             return false;
         }
-        old = atomicCAS(address_as_ull, assumed,__double_as_longlong(-UNIT + __longlong_as_double(assumed)));
+        old = atomicCAS(address_as_ull, assumed,__double_as_longlong(-MACRO_UNIT + __longlong_as_double(assumed)));
     } while (assumed != old);
     return true;
 }
@@ -786,7 +785,7 @@ __device__ __forceinline__ double genProbRand(int id){
 }
 
 __device__ __forceinline__ int genAntNumRand(int id){
-    return curand(&rnd_state[id])%NMAX;
+    return curand(&rnd_state[id])%MACRO_NMAX;
 }
 
 __device__ __forceinline__ double degToRad(double a) {
@@ -834,7 +833,7 @@ __device__ __forceinline__ enum Direction selectNextDir(Cell& cell, enum Directi
         rightCount++;
     }
 
-    for (enum Direction currentDir=left(dir); currentDir!=dir; currentDir=left(currnetDir)){
+    for (enum Direction currentDir=left(dir); currentDir!=dir; currentDir=left(currentDir)){
         if( (cell.criticalAngle & currentDir)!=currentDir ){
             break;
         }
@@ -859,17 +858,17 @@ __device__ __forceinline__ double hilFunc(double x,double alpha){
 __host__ void initialize(){
     getDevicePtrs();
 
-    //antsInit<<<NMAX,1>>>();
-    cellsInit<<<MAX,MAX>>>();
+    //antsInit<<<MACRO_NMAX,1>>>();
+    cellsInit<<<MACRO_MAX,MACRO_MAX>>>();
 
-    setEdges<<<MAX,MAX>>>();
-    setNest<<<MAX,MAX>>>();
-    setDistFromNest<<<MAX,MAX>>>();
+    setEdges<<<MACRO_MAX,MACRO_MAX>>>();
+    setNest<<<MACRO_MAX,MACRO_MAX>>>();
+    setDistFromNest<<<MACRO_MAX,MACRO_MAX>>>();
 
-    setCriticalAngle<<<MAX,MAX>>>();
+    setCriticalAngle<<<MACRO_MAX,MACRO_MAX>>>();
 
-    setNestDirs<<<MAX,MAX>>>();
-    setFoodsDir<<<NUM_FOODS,1>>>();
+    setNestDirs<<<MACRO_MAX,MACRO_MAX>>>();
+    setFoodsDir<<<MACRO_NUM_FOODS,1>>>();
 }
 
 __host__ void reset(double sensor,int naho,unsigned long long int step){
@@ -877,24 +876,24 @@ __host__ void reset(double sensor,int naho,unsigned long long int step){
     cudaMemcpyToSymbol(NAHO,&naho,sizeof(int),0);
 
     //initialize();
-    //antsInit<<<NMAX,1>>>();
-    //cellsInit<<<MAX,MAX>>>();
+    //antsInit<<<MACRO_NMAX,1>>>();
+    //cellsInit<<<MACRO_MAX,MACRO_MAX>>>();
 
-    //setEdges<<<MAX,MAX>>>();
-    //setNest<<<MAX,MAX>>>();
-    //setDistFromNest<<<MAX,MAX>>>();
+    //setEdges<<<MACRO_MAX,MACRO_MAX>>>();
+    //setNest<<<MACRO_MAX,MACRO_MAX>>>();
+    //setDistFromNest<<<MACRO_MAX,MACRO_MAX>>>();
 
-    //setNestDirs<<<MAX,MAX>>>();
-    //setFoodsDir<<<NUM_FOODS,1>>>();
+    //setNestDirs<<<MACRO_MAX,MACRO_MAX>>>();
+    //setFoodsDir<<<MACRO_NUM_FOODS,1>>>();
 
-    srand(RND_SEED+step);
+    srand(MACRO_RND_SEED+step);
 
-    thrust::host_vector<unsigned long long int> seeds_vec_h(NMAX);
+    thrust::host_vector<unsigned long long int> seeds_vec_h(MACRO_NMAX);
     std::generate(seeds_vec_h.begin(), seeds_vec_h.end(), rand);
     thrust::copy(seeds_vec_h.begin(), seeds_vec_h.end(), seeds_d_ptr);
-    randInit<<<NMAX,1>>>();
+    randInit<<<MACRO_NMAX,1>>>();
 
-    antsReset<<<NMAX,1>>>();
-    cellsReset<<<MAX,MAX>>>();
-    foodsReset<<<NUM_FOODS,1>>>();
+    antsReset<<<MACRO_NMAX,1>>>();
+    cellsReset<<<MACRO_MAX,MACRO_MAX>>>();
+    foodsReset<<<MACRO_NUM_FOODS,1>>>();
 }

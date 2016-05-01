@@ -34,20 +34,20 @@ int main(int argc, char *argv[]){
 
     double normalSum = 0.0;
 
-    for(unsigned long long int dummy=1; dummy<=MAX_STEP; dummy++){
+    for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
         reset(1,0,dummy);
 
-        //cudaDeviceSynchronize();
-        //display(argc,argv);
+        cudaDeviceSynchronize();
+        display(argc,argv);
 
-        for(int t=0; t<MAX_TIME; t++){
+        for(int t=0; t<MACRO_MAX_TIME; t++){
             calculation();
-            if(t%500==0){
-                IOEffPoll(0,500,dummy,t);
-            }
+            /* if(t%500==0){ */
+            /*     IOEffPoll(0,500,dummy,t); */
+            /* } */
         }
 
-        normalSum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+NMAX, homeOp, 0, binary_op);
+        normalSum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, homeOp, 0, binary_op);
     }
 
     for (int n=0; n<=500; n+=50){
@@ -57,21 +57,21 @@ int main(int argc, char *argv[]){
     for (int pw=1; pw<=7; pw++){
         for (int n=0; n<=450; n+=50){
             double sensor = pow(10,-pw);
-            int naho = (NMAX - n);
+            int naho = (MACRO_NMAX - n);
 
             double sum = 0.0;
-            for(unsigned long long int dummy=1; dummy<=MAX_STEP; dummy++){
+            for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
                 reset(sensor,naho,dummy);
 
-                //display(argc,argv);
-                for(int t=1; t<=MAX_TIME; t++){
+                display(argc,argv);
+                for(int t=1; t<=MACRO_MAX_TIME; t++){
                     calculation();
-                    if(t%500==0){
-                        IOEffPoll(pw,n,dummy,t);
-                    }
+                    // if(t%500==0){
+                    //     IOEffPoll(pw,n,dummy,t);
+                    // }
                 }
 
-                sum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+NMAX, homeOp, 0, binary_op);
+                sum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, homeOp, 0, binary_op);
             }
             // IOCellWrite(pw,n);
             IOEffWrite(pw,n,sum);

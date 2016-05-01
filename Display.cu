@@ -1,5 +1,7 @@
 #include "Display.h"
 
+#include <iostream>
+
 void displayFunc();
 void init();
 void reshape(int w,int h);
@@ -7,8 +9,8 @@ void idle();
 
 float getMaxPhero(){
     float max = -1;
-    for (int i=0; i<MAX; i++){
-        for (int j=0; j<MAX; j++){
+    for (int i=0; i<MACRO_MAX; i++){
+        for (int j=0; j<MACRO_MAX; j++){
             float p = cells[i][j].phero;
             if (max<p){
                 max=p;
@@ -47,6 +49,7 @@ void getHeatMapColor(float value, float cl[3]){
 }
 
 void display(int argc, char *argv[]){
+    std::cout << "Disp Init" << std::endl;
     glutInitWindowSize(600, 600);
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DOUBLE);
@@ -56,6 +59,7 @@ void display(int argc, char *argv[]){
     glutReshapeFunc(reshape);
     init();
     glutMainLoop();
+    std::cout << "Disp End" << std::endl;
 }
 
 void idle(void)
@@ -76,7 +80,7 @@ void glDrawHex(double x,double y, double r, float rgb[3]){
     glBegin(GL_TRIANGLE_FAN);
     glColor3f(rgb[0], rgb[1], rgb[2]);
     glVertex2f(x, y);
-    for (int i=0; i<6; i++){
+    for (int i=0; i<=6; i++){
         glVertex2f(x + r*cos(i*M_PI/3), y + r*sin(i*M_PI/3));
     }
     glEnd();
@@ -104,8 +108,11 @@ void glDrawFood(double x,double y,double r){
 
 void drawCells(){
     float maxPhero = getMaxPhero();
-    for(int i=1; i<MAX; i++){
-        for(int j=1; j<MAX; j++){
+    if (maxPhero <= MACRO_EPS ){
+        maxPhero = 1.0;
+    }
+    for(int i=1; i<MACRO_MAX; i++){
+        for(int j=1; j<MACRO_MAX; j++){
             double x = cells[i][j].cart.x;
             double y = cells[i][j].cart.y;
             float p = cells[i][j].phero;
@@ -125,7 +132,7 @@ void drawCells(){
 }
 
 void drawAnts(){
-    for(int k=1; k<NMAX; k++){
+    for(int k=1; k<MACRO_NMAX; k++){
         int i,j;
         enum AntStatus s = ants[k].status;
         i = ants[k].i;
@@ -157,9 +164,9 @@ void drawAnts(){
 void displayFunc(void){
     glClear(GL_COLOR_BUFFER_BIT);
     calculation();
-    cudaMemcpyFromSymbol(cells,cells_d,MAX*MAX*sizeof(Cell),0);
-    cudaMemcpyFromSymbol(ants,ants_d,NMAX*sizeof(Ant),0);
-    drawCells();
+    cudaMemcpyFromSymbol(cells,cells_d,MACRO_MAX*MACRO_MAX*sizeof(Cell),0);
+    cudaMemcpyFromSymbol(ants,ants_d,MACRO_NMAX*sizeof(Ant),0);
+    /* drawCells(); */
     drawAnts();
 
     glutSwapBuffers();
@@ -173,5 +180,5 @@ void reshape(int w, int h){
     glMatrixMode(GL_PROJECTION);
     glViewport(0, 0, w, h);
     glLoadIdentity();
-    gluOrtho2D(-(CART_X_ZERO+1),(MAX-CART_X_ZERO)+1,-(CART_Y_ZERO+1),(MAX-CART_Y_ZERO)+1);
+    gluOrtho2D(-(MACRO_CART_X_ZERO+1),(MACRO_MAX-MACRO_CART_X_ZERO)+1,-(MACRO_CART_Y_ZERO+1),(MACRO_MAX-MACRO_CART_Y_ZERO)+1);
 }

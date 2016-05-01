@@ -60,7 +60,7 @@ typedef struct {
     enum Direction dir;
     int searchTime;
     enum AntCharacter ch;
-    int homing[NUM_FOODS];
+    int homing[MACRO_NUM_FOODS];
     int _foodNo;
 } Ant;
 
@@ -68,7 +68,7 @@ typedef struct {
 struct getHoming{
     __host__ __device__ int operator()(const Ant& x) const { 
         int sum = 0;
-        for (int i=0; i<NUM_FOODS; i++){
+        for (int i=0; i<MACRO_NUM_FOODS; i++){
             sum += x.homing[i];
         }
         return sum;
@@ -79,7 +79,7 @@ template <AntCharacter t> struct getHomingWithType{
     __host__ __device__ int operator()(const Ant& x) const {
         if(x.ch==t){
             int sum = 0;
-            for (int i=0; i<NUM_FOODS; i++){
+            for (int i=0; i<MACRO_NUM_FOODS; i++){
                 sum += x.homing[i];
             }
             return sum;

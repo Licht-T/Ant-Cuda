@@ -12,7 +12,7 @@ template <int max> struct getHomingFood{
         static const int n = max-1;
         static thrust::plus<int> binary_op;
         if(n==i){
-            return thrust::transform_reduce(ants_d_ptr, ants_d_ptr+NMAX, getHomingWithFoodNum<n>(), 0, binary_op);;
+            return thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, getHomingWithFoodNum<n>(), 0, binary_op);;
         }
         else{
             return getHomingFood<n>()(i);
@@ -31,7 +31,7 @@ template <AntCharacter ch,int max> struct getHomingTypeAndFood{
         static const int n = max-1;
         static thrust::plus<int> binary_op;
         if(n==i){
-            return thrust::transform_reduce(ants_d_ptr, ants_d_ptr+NMAX, getHomingWithTypeAndFoodNum<ch,n>(), 0, binary_op);;
+            return thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, getHomingWithTypeAndFoodNum<ch,n>(), 0, binary_op);;
         }
         else{
             return getHomingTypeAndFood<ch,n>()(i);
@@ -78,22 +78,22 @@ void IOInit(){
 
     pw_old = -1;
 
-    std::string nmax = toString(NMAX);
-    std::string max = toString(MAX);
+    std::string nmax = toString(MACRO_NMAX);
+    std::string max = toString(MACRO_MAX);
 
     std::string initDir(nmax+"ants_"+max+"x"+max+"cells");
     if(stat(initDir.c_str(), &st) != 0){
         mkdir(initDir.c_str(), 0775);
     }
 
-    std::string fnum = toString(NUM_FOODS);
+    std::string fnum = toString(MACRO_NUM_FOODS);
 
     std::string fNumDir(initDir+"/"+fnum+"foodnum");
     if(stat(fNumDir.c_str(), &st) != 0){
         mkdir(fNumDir.c_str(), 0775);
     }
 
-    std::string fsource = toString(FOODSOURCE);
+    std::string fsource = toString(MACRO_FOODSOURCE);
     std::string fdist = toString(FOOD_DIST);
 
     std::string fCondDir(fNumDir+"/"+fsource+"initfvol_"+fdist+"fdist");
@@ -101,7 +101,7 @@ void IOInit(){
         mkdir(fCondDir.c_str(), 0775);
     }
 
-    std::string step = toString(MAX_STEP);
+    std::string step = toString(MACRO_MAX_STEP);
     std::string angle = toString(FOOD_ANGLE);
 
     std::string stepAngleDir(fCondDir+"/"+step+"steps_"+angle+"deg");
@@ -126,7 +126,7 @@ void IOEffWrite(int pw, int n, double sum){
     }
     (*ofs)  << pw << " "
         << n  << " "
-        << (sum/(MAX_STEP))/(MAX_TIME-1000)
+        << (sum/(MACRO_MAX_STEP))/(MACRO_MAX_TIME-1000)
         << std::endl;
 }
 
@@ -138,9 +138,9 @@ void IOCellWrite(int pw, int n){
     std::string celldata(path+"cell_"+anglestr+"deg_10e-"+pwstr+"_"+nstr+"normal"+".dat");
     std::ofstream cellfs(celldata.c_str());
 
-    cudaMemcpyFromSymbol(cells,cells_d,MAX*MAX*sizeof(Cell),0);
-    for(int i=0; i<MAX; i++){
-        for(int j=0; j<MAX; j++){
+    cudaMemcpyFromSymbol(cells,cells_d,MACRO_MAX*MACRO_MAX*sizeof(Cell),0);
+    for(int i=0; i<MACRO_MAX; i++){
+        for(int j=0; j<MACRO_MAX; j++){
             cellfs << cells[j][i].cart.x << " "
                 << cells[j][i].cart.y << " "
                 << cells[j][i].phero
@@ -155,16 +155,16 @@ void IOEffPoll(int pw, int n, int sample, int t){
     static getHomingWithType<NORMAL_CH> normalOp;
     static getHomingWithType<FOOL_CH> ahoOp;
     static thrust::plus<int> binary_op;
-    static int homingFoods[NUM_FOODS];
-    static int foolHomingFoods[NUM_FOODS];
-    static int normalHomingFoods[NUM_FOODS];
-    static getHomingFood<NUM_FOODS> homingFoodFunctor;
-    static getHomingTypeAndFood<FOOL_CH,NUM_FOODS> foolHomingFoodFunctor;
-    static getHomingTypeAndFood<NORMAL_CH,NUM_FOODS> normalHomingFoodFunctor;
-    static thrust::host_vector<double> phero_h(NUM_FOODS);
-    static thrust::device_vector<double> phero_d(NUM_FOODS);	
+    static int homingFoods[MACRO_NUM_FOODS];
+    static int foolHomingFoods[MACRO_NUM_FOODS];
+    static int normalHomingFoods[MACRO_NUM_FOODS];
+    static getHomingFood<MACRO_NUM_FOODS> homingFoodFunctor;
+    static getHomingTypeAndFood<FOOL_CH,MACRO_NUM_FOODS> foolHomingFoodFunctor;
+    static getHomingTypeAndFood<NORMAL_CH,MACRO_NUM_FOODS> normalHomingFoodFunctor;
+    static thrust::host_vector<double> phero_h(MACRO_NUM_FOODS);
+    static thrust::device_vector<double> phero_d(MACRO_NUM_FOODS);	
 
-    std::string stepstr = toString(MAX_STEP);
+    std::string stepstr = toString(MACRO_MAX_STEP);
     std::string anglestr = toString(FOOD_ANGLE);
 
     std::string pwstr = toString(pw);
@@ -174,44 +174,44 @@ void IOEffPoll(int pw, int n, int sample, int t){
     std::string celldata(path+"food_"+anglestr+"deg_10e-"+pwstr+"_"+nstr+"normal"+"_sampleNo"+samplestr+"_of_"+stepstr+".dat");
     std::ofstream pollfs(celldata.c_str(),std::ios::out | std::ios::app);
 
-    int nor = thrust::transform_reduce(ants_d_ptr, ants_d_ptr+NMAX, normalOp, 0, binary_op);
-    int aho = thrust::transform_reduce(ants_d_ptr, ants_d_ptr+NMAX, ahoOp, 0, binary_op);
+    int nor = thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, normalOp, 0, binary_op);
+    int aho = thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, ahoOp, 0, binary_op);
 
-    thrust::transform(foods_d_ptr, foods_d_ptr+NUM_FOODS, phero_d.begin(), getPheroAroundFood());
+    thrust::transform(foods_d_ptr, foods_d_ptr+MACRO_NUM_FOODS, phero_d.begin(), getPheroAroundFood());
     thrust::copy(phero_d.begin(), phero_d.end(), phero_h.begin());
 
     pollfs  << t << " ";
 
-    for (int i=0; i<NUM_FOODS; i++){
+    for (int i=0; i<MACRO_NUM_FOODS; i++){
         //homingFoods[i] = homingFoodFunctor(i);
         foolHomingFoods[i] = foolHomingFoodFunctor(i);
         normalHomingFoods[i] = normalHomingFoodFunctor(i);
         homingFoods[i]=foolHomingFoods[i]+normalHomingFoods[i];
     }
 
-    for (int i=0; i<NUM_FOODS; i++){
+    for (int i=0; i<MACRO_NUM_FOODS; i++){
         pollfs  << homingFoods[i]
             << " ";
     }
     pollfs  << nor      << " "
         << aho      << " "
         << nor/(double)n << " "
-        << aho/(double)(NMAX-n) << " "
+        << aho/(double)(MACRO_NMAX-n) << " "
         << (nor+aho)<< " ";
-    for (int i=0; i<NUM_FOODS; i++){
+    for (int i=0; i<MACRO_NUM_FOODS; i++){
         pollfs << normalHomingFoods[i] << " ";
     }
-    for (int i=0; i<NUM_FOODS; i++){
+    for (int i=0; i<MACRO_NUM_FOODS; i++){
         pollfs << foolHomingFoods[i] << " ";
     }
-    for (int i=0; i<NUM_FOODS; i++){
+    for (int i=0; i<MACRO_NUM_FOODS; i++){
         pollfs << normalHomingFoods[i]/(double)n << " ";
     }
-    for (int i=0; i<NUM_FOODS; i++){
-        pollfs << foolHomingFoods[i]/(double)(NMAX-n) << " ";
+    for (int i=0; i<MACRO_NUM_FOODS; i++){
+        pollfs << foolHomingFoods[i]/(double)(MACRO_NMAX-n) << " ";
     }
     pollfs << (nor+aho) << " ";
-    for (int i=0; i<NUM_FOODS; i++){
+    for (int i=0; i<MACRO_NUM_FOODS; i++){
         pollfs << phero_h[i] << " ";
     }
     pollfs << std::endl;
