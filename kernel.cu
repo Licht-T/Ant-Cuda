@@ -209,11 +209,11 @@ __global__ void setCriticalAngle() {
                 break;
             case UPRIGHT:
                 d.x = 1;
-                d.y = tan(M_PI/6.0);
+                d.y = tan(M_PI/4.0);
                 break;
             case LOWRIGHT:
                 d.x = 1;
-                d.y = -tan(M_PI/6.0);
+                d.y = -tan(M_PI/4.0);
                 break;
             case LOW:
                 d.x = 0;
@@ -221,11 +221,11 @@ __global__ void setCriticalAngle() {
                 break;
             case LOWLEFT:
                 d.x = -1;
-                d.y = -tan(M_PI/6.0);
+                d.y = -tan(M_PI/4.0);
                 break;
             case UPLEFT:
                 d.x = -1;
-                d.y = tan(M_PI/6.0);
+                d.y = tan(M_PI/4.0);
                 break;
             default:
                 break;
