@@ -10,8 +10,8 @@
 #define MACRO_FOODSOURCE 10
 //#define FOODSOURCE 60
 #define MACRO_NUM_FOODS 2
-//#define FOOD_DIST 45
-//#define FOOD_ANGLE 80
+//#define MACRO_FOOD_DIST 45
+//#define MACRO_FOOD_ANGLE 80
 
 #define MACRO_NEST_X (MACRO_MAX/2)
 #define MACRO_NEST_Y (MACRO_MAX/3)

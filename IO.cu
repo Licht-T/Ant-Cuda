@@ -94,7 +94,7 @@ void IOInit(){
     }
 
     std::string fsource = toString(MACRO_FOODSOURCE);
-    std::string fdist = toString(FOOD_DIST);
+    std::string fdist = toString(MACRO_FOOD_DIST);
 
     std::string fCondDir(fNumDir+"/"+fsource+"initfvol_"+fdist+"fdist");
     if(stat(fCondDir.c_str(), &st) != 0){
@@ -102,7 +102,7 @@ void IOInit(){
     }
 
     std::string step = toString(MACRO_MAX_STEP);
-    std::string angle = toString(FOOD_ANGLE);
+    std::string angle = toString(MACRO_FOOD_ANGLE);
 
     std::string stepAngleDir(fCondDir+"/"+step+"steps_"+angle+"deg");
     if(stat(stepAngleDir.c_str(), &st) != 0){
@@ -133,7 +133,7 @@ void IOEffWrite(int pw, int n, double sum){
 void IOCellWrite(int pw, int n){
     std::string pwstr = toString(pw);
     std::string nstr = toString(n);
-    std::string anglestr = toString(FOOD_ANGLE);
+    std::string anglestr = toString(MACRO_FOOD_ANGLE);
 
     std::string celldata(path+"cell_"+anglestr+"deg_10e-"+pwstr+"_"+nstr+"normal"+".dat");
     std::ofstream cellfs(celldata.c_str());
@@ -165,7 +165,7 @@ void IOEffPoll(int pw, int n, int sample, int t){
     static thrust::device_vector<double> phero_d(MACRO_NUM_FOODS);	
 
     std::string stepstr = toString(MACRO_MAX_STEP);
-    std::string anglestr = toString(FOOD_ANGLE);
+    std::string anglestr = toString(MACRO_FOOD_ANGLE);
 
     std::string pwstr = toString(pw);
     std::string nstr = toString(n);

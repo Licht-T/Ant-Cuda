@@ -274,13 +274,13 @@ __global__ void foodsReset(){
 
 __global__ void setFoodsDir(){
     const int i = threadIdx.x + blockIdx.x * blockDim.x;
-    const double dtheta = degToRad(FOOD_ANGLE);
+    const double dtheta = degToRad(MACRO_FOOD_ANGLE);
 
     Cell *nearCell=NULL;
 
     double x,y;
-    x=FOOD_DIST * cos(i*dtheta);
-    y=FOOD_DIST * sin(i*dtheta);
+    x=MACRO_FOOD_DIST * cos(i*dtheta);
+    y=MACRO_FOOD_DIST * sin(i*dtheta);
     for(int j=0; j<MACRO_MAX; j++){
         for(int k=0; k<MACRO_MAX; k++){
             if(distCandP(cells_d[j][k],x,y)<=sqrt(3.0)/3.0+MACRO_EPS){
