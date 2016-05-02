@@ -29,6 +29,7 @@ __global__ void cellsInit();
 __global__ void setNest();
 __global__ void setDistFromNest();
 __global__ void setNestDirs();
+__global__ void setNearestDirFromNest();
 __global__ void setFoodsDir();
 
 //Calculation functions
@@ -239,7 +240,27 @@ __global__ void setCriticalAngle() {
             cells_d[i][j].criticalAngle |= dir;
         }
     }
+}
 
+
+__global__ void setNearestDirFromNest(){
+    const int i = threadIdx.x;
+    const int j = blockIdx.x;
+    Cell& c = cells_d[i][j];
+
+    for (int itr=0; itr<6; itr++){
+        c.nearestDirFromNestList[itr] = NONE;
+    }
+
+    enum Direction dir = UP
+    for(int itr=0; dir<=UPLEFT; itr++) {
+        if ( c.criticalAngle&dir == NONE ){
+            continue;
+        }
+
+        c.nearestDirFromNestList[itr] = selectNextDir(c, dir);
+        dir<<=1;
+    }
 
 }
 
@@ -866,6 +887,7 @@ __host__ void initialize(){
     setDistFromNest<<<MACRO_MAX,MACRO_MAX>>>();
 
     setCriticalAngle<<<MACRO_MAX,MACRO_MAX>>>();
+    setNearestDirFromNest<<<MACRO_MAX,MACRO_MAX>>>();
 
     setNestDirs<<<MACRO_MAX,MACRO_MAX>>>();
     setFoodsDir<<<MACRO_NUM_FOODS,1>>>();

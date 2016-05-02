@@ -122,5 +122,6 @@ typedef struct {
     int i,j;
     Cartesian cart;
     double distFromNest;
+    enum Direction nearestDirFromNestList[6];
 } Cell;
 
