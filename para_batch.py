@@ -21,7 +21,7 @@ for dist in dists:
         args = [make_cmd, "ANGLE="+str(angle), "DIST="+str(dist)]
         subprocess.call(args)
 
-for dist in dists:
-    for angle in angles:
-        subprocess.call("export CUDA_VISIBLE_DEVICES=0; ./{0}dist_{1}deg.exe;".format(dist, angle))
-        print("{0}dist, {1}deg. ended.".format(dist, angle))
+# for dist in dists:
+#     for angle in angles:
+#         subprocess.call("export CUDA_VISIBLE_DEVICES=0; ./{0}dist_{1}deg.exe;".format(dist, angle))
+#         print("{0}dist, {1}deg. ended.".format(dist, angle))
