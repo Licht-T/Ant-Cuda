@@ -40,7 +40,7 @@ CXXFLAGS = -O3 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -D_FORCE_IN
 LD = nvcc
 LDFLAGS = 
 
-TARGET = ${ANGLE}.deg
+TARGET = ${DIST}dist_${ANGLE}deg.exe
 CUSOURCES = main.cu IO.cu DataStructures.cu Variables.cu kernel.cu Display.cu
 CSOURCES =
 CXXSOURCES =
@@ -65,4 +65,4 @@ ${TARGET}: ${OBJECTS}
 	${CXX} -c ${CXXFLAGS} ${INCLUDES} $<
 
 clean :
-	-rm -f  ${OBJECTS} *.deg freeglut.dll
+	-rm -f  ${OBJECTS} *.exe freeglut.dll
