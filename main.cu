@@ -24,60 +24,67 @@
 
 int main(int argc, char *argv[]){
 
-	getHoming homeOp;
-	thrust::plus<int> binary_op;
+    getHoming homeOp;
+    thrust::plus<int> binary_op;
 
-	IOInit();
+    IOInit();
 
-	initialize();
+    initialize();
 
 
-	double normalSum = 0.0;
+    double normalSum = 0.0;
 
-	for(unsigned long long int dummy=1; dummy<=MAX_STEP; dummy++){
-		reset(1,0,dummy);
+    for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
+        reset(pow(10,-3),50,dummy);
+        display(argc,argv);
 
-		//cudaDeviceSynchronize();
-		//display(argc,argv);
+        for(int t=0; t<MACRO_MAX_TIME; t++){
+            calculation();
+        }
+    }
 
-		for(int t=0; t<MAX_TIME; t++){
-			calculation();
-			if(t%500==0){
-				IOEffPoll(0,500,dummy,t);
-			}
-		}
+    for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
+        reset(1,0,dummy);
 
-		normalSum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+NMAX, homeOp, 0, binary_op);
-	}
+        // display(argc,argv);
 
-	for (int n=0; n<=500; n+=50){
-		IOEffWrite(0,n,normalSum);
-	}
+        for(int t=0; t<MACRO_MAX_TIME; t++){
+            calculation();
+            // if(t%500==0){
+            //     IOEffPoll(0,500,dummy,t);
+            // }
+        }
 
-	for (int pw=1; pw<=7; pw++){
-		for (int n=0; n<=450; n+=50){
-			double sensor = pow(10,-pw);
-			int naho = (NMAX - n);
+        normalSum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, homeOp, 0, binary_op);
+    }
 
-			double sum = 0.0;
-			for(unsigned long long int dummy=1; dummy<=MAX_STEP; dummy++){
-				reset(sensor,naho,dummy);
+    for (int n=0; n<=500; n+=50){
+        IOEffWrite(0,n,normalSum);
+    }
 
-				//display(argc,argv);
-				for(int t=1; t<=MAX_TIME; t++){
-					calculation();
-					if(t%500==0){
-						IOEffPoll(pw,n,dummy,t);
-					}
-				}
+    for (int pw=1; pw<=7; pw++){
+        for (int n=0; n<=450; n+=50){
+            double sensor = pow(10,-pw);
+            int naho = (MACRO_NMAX - n);
 
-				sum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+NMAX, homeOp, 0, binary_op);
-			}
-			IOCellWrite(pw,n);
-			IOEffWrite(pw,n,sum);
-		}
-		IOEffWrite(pw,500,normalSum);
-	}
+            double sum = 0.0;
+            for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
+                reset(sensor,naho,dummy);
+
+                for(int t=1; t<=MACRO_MAX_TIME; t++){
+                    calculation();
+                    // if(t%500==0){
+                    //     IOEffPoll(pw,n,dummy,t);
+                    // }
+                }
+
+                sum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, homeOp, 0, binary_op);
+            }
+            // IOCellWrite(pw,n);
+            IOEffWrite(pw,n,sum);
+        }
+        IOEffWrite(pw,500,normalSum);
+    }
 
 }
 

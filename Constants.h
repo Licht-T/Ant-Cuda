@@ -1,36 +1,36 @@
 #pragma once
 
-#define EPS (10e-308)
-#define RND_SEED 123456
+#define MACRO_EPS (10e-308)
+#define MACRO_RND_SEED 123456
 
 //Initialize
-#define NMAX 500
-#define MAX  200
+#define MACRO_NMAX 500
+#define MACRO_MAX  200
 
-#define FOODSOURCE 10
+#define MACRO_FOODSOURCE 10
 //#define FOODSOURCE 60
-#define NUM_FOODS 3
-//#define FOOD_DIST 45
-//#define FOOD_ANGLE 80
+#define MACRO_NUM_FOODS 2
+//#define MACRO_FOOD_DIST 45
+//#define MACRO_FOOD_ANGLE 80
 
-#define NEST_X (MAX/2)
-#define NEST_Y (MAX/3)
+#define MACRO_NEST_X (MACRO_MAX/2)
+#define MACRO_NEST_Y (MACRO_MAX/3)
 
-#define CART_X_ZERO NEST_X
-#define CART_Y_ZERO NEST_Y
+#define MACRO_CART_X_ZERO MACRO_NEST_X
+#define MACRO_CART_Y_ZERO MACRO_NEST_Y
 
 
 //Caluculation
-#define REC 0.4
-//#define REC 0.3
-#define EVAPOLATION_CONST 0.01
-#define MAX_SEARCH_TIME 150
-#define MAX_STEP 10
-#define MAX_TIME 80000
-#define OFFSET_TIME 0
-#define EMI 0.08
-#define ENEST 1.0
-#define HIL_CONST 50.0
-#define UNIT 2.0
-#define DIFFE 0.015
+#define MACRO_REC 0.4
+//#define MACRO_REC 0.3
+#define MACRO_EVAPOLATION_CONST 0.01
+#define MACRO_MAX_SEARCH_TIME 150
+#define MACRO_MAX_STEP 20
+#define MACRO_MAX_TIME 40000
+#define MACRO_OFFSET_TIME 0
+#define MACRO_EMI 0.08
+#define MACRO_ENEST 1.0
+#define MACRO_HIL_CONST 50.0
+#define MACRO_UNIT 2.0
+#define MACRO_DIFFE 0.015
 
