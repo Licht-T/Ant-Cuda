@@ -2,9 +2,10 @@ import os
 import subprocess
 
 make_cmd = "make"
-dists = [30,]
-# angles = [10, 45, 90]
-angles = [10,]
+# dists = [30,]
+# angles = [10,]
+dists = [50, 45, 40, 30,]
+angles = [10, 45, 90,]
 
 flag_win = False
 try:
