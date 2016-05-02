@@ -34,14 +34,14 @@ int main(int argc, char *argv[]){
 
     double normalSum = 0.0;
 
-    /* for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){ */
-    /*     reset(pow(10,-3),50,dummy); */
-    /*     display(argc,argv); */
-    /*  */
-    /*     for(int t=0; t<MACRO_MAX_TIME; t++){ */
-    /*         calculation(); */
-    /*     } */
-    /* } */
+    for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
+        reset(pow(10,-3),50,dummy);
+        display(argc,argv);
+
+        for(int t=0; t<MACRO_MAX_TIME; t++){
+            calculation();
+        }
+    }
 
     for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
         reset(1,0,dummy);
