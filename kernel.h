@@ -31,7 +31,7 @@ __device__ __host__ enum Direction& operator<<=(enum Direction& d1, int i);
 __device__ __host__ enum Direction& operator>>=(enum Direction& d1, int i);
 __device__ __host__ bool operator<=(enum Direction d1, enum Direction d2);
 __device__ __host__ Cell* getCell(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j, enum Direction dir);
-
+__device__ __host__ int dirToNum(enum Direction dir);
 
 
 __device__ __host__  enum CELLStatus operator<<(enum CELLStatus d, int i);

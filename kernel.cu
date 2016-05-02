@@ -252,7 +252,7 @@ __global__ void setNearestDirFromNest(){
         c.nearestDirFromNestList[itr] = NONE;
     }
 
-    enum Direction dir = UP
+    enum Direction dir = UP;
     for(int itr=0; dir<=UPLEFT; itr++) {
         if ( c.criticalAngle&dir == NONE ){
             continue;
@@ -261,7 +261,6 @@ __global__ void setNearestDirFromNest(){
         c.nearestDirFromNestList[itr] = selectNextDir(c, dir);
         dir<<=1;
     }
-
 }
 
 __global__ void setNestDirs(){
@@ -428,7 +427,7 @@ __global__ void chemotaxis(){
 
         if( (ant->status==GOHOME || ant->status==EMERGENCY) && isOppositeDir(cells_d[i][j], dir)){
 
-            enum Direction nextDir = selectNextDir(cells_d[i][j], dir);
+            enum Direction nextDir = cells_d[i][j].nearestDirFromNestList[dirToNum(dir)];
 
             if( nextDir == left(dir) ){
                 ant->dir = left(dir);
@@ -763,6 +762,25 @@ __device__ __host__ Cell* getCell(Cell cells[MACRO_MAX][MACRO_MAX],int i,int j, 
             return upleft(cells,i,j);
         default:
             return NULL;
+    }
+}
+
+__device__ __host__ int dirToNum(enum Direction dir){
+    switch (dir){
+        case UP:
+            return 0;
+        case UPRIGHT:
+            return 1;
+        case LOWRIGHT:
+            return 2;
+        case LOW:
+            return 3;
+        case LOWLEFT:
+            return 4;
+        case UPLEFT:
+            return 5;
+        default:
+            return -1;
     }
 }
 
