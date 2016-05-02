@@ -166,8 +166,8 @@ void displayFunc(void){
     calculation();
     cudaMemcpyFromSymbol(cells,cells_d,MACRO_MAX*MACRO_MAX*sizeof(Cell),0);
     cudaMemcpyFromSymbol(ants,ants_d,MACRO_NMAX*sizeof(Ant),0);
-    drawCells();
-    /* drawAnts(); */
+    /* drawCells(); */
+    drawAnts();
 
     glutSwapBuffers();
 }
