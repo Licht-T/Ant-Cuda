@@ -236,7 +236,7 @@ __global__ void setCriticalAngle() {
         d.y = d.y/sqrt(dot(d,d));
 
         double dotVal = dot(c,d);
-        if (dotVal<=0.5){
+        if (dotVal<=0.3){
             cells_d[i][j].criticalAngle |= dir;
         }
     }
