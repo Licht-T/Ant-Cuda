@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include "kernel.h"
 
 __constant__ double SENSOR2;
@@ -9,7 +11,7 @@ __device__ curandState rnd_state[MACRO_NMAX];
 
 //Misc
 __device__ bool isGotFood(Food& food);
-__device__ double atomicAdd(double* address, double val);
+__device__ double atomicAddDouble(double* address, double val);
 __device__ enum Direction genDirRand(int id);
 __device__ double genProbRand(int id);
 __device__ int genAntNumRand(int id);
@@ -236,7 +238,7 @@ __global__ void setCriticalAngle() {
         d.y = d.y/sqrt(dot(d,d));
 
         double dotVal = dot(c,d);
-        if (dotVal<=0.5){
+        if (dotVal<=0.3){
             cells_d[i][j].criticalAngle |= dir;
         }
     }
@@ -411,7 +413,7 @@ __global__ void chemotaxis(){
         }
 
         if(ant->status==GOHOME){
-            atomicAdd(&(cells_d[i][j].phero),MACRO_EMI*MACRO_ENEST);
+            atomicAddDouble(&(cells_d[i][j].phero),MACRO_EMI*MACRO_ENEST);
         }
         __threadfence();
         if(ant->status==RANDOM_SEARCH){
@@ -497,7 +499,7 @@ __global__ void chemotaxis(){
         if( (cells_d[ant->i][ant->j].status&NEAR_FOOD)!=NORMAL_CELL
                 &&  foods_d[  cells_d[ant->i][ant->j].foodNo  ].vol>=0.1
                 &&  (ant->status != GOHOME && ant->status != EMERGENCY) ){
-            //atomicAdd(&(foods_d[  cells_d[ant->i][ant->j].foodNo  ].vol),-MACRO_UNIT);
+            //atomicAddDouble(&(foods_d[  cells_d[ant->i][ant->j].foodNo  ].vol),-MACRO_UNIT);
             //ant->status = GOHOME;
             //ant->searchTime = 0;
             int fNo = cells_d[ant->i][ant->j].foodNo;
@@ -515,7 +517,7 @@ __global__ void chemotaxis(){
                 &&  (ant->status == GOHOME || ant->status == EMERGENCY)){
             if(ant->status == GOHOME){
                 ant->homing[ant->_foodNo]++;
-                //atomicAdd(&(cells_d[i][j].phero),MACRO_EMI*MACRO_ENEST);
+                //atomicAddDouble(&(cells_d[i][j].phero),MACRO_EMI*MACRO_ENEST);
             }
             ant->status = FORAGE;
             ant->searchTime = 0;
@@ -802,7 +804,7 @@ __device__ __forceinline__ bool isGotFood(Food& food){
     return true;
 }
 
-__device__ __forceinline__ double atomicAdd(double* address, double val){
+__device__ __forceinline__ double atomicAddDouble(double* address, double val){
     unsigned long long int* address_as_ull =
         (unsigned long long int*)address;
     unsigned long long int old = *address_as_ull, assumed;

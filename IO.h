@@ -6,6 +6,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifdef _WIN32
+#include <direct.h>
+#endif
+
 #include "Constants.h"
 #include "DataStructures.h"
 #include "Variables.h"
