@@ -83,14 +83,22 @@ void IOInit(){
 
     std::string initDir(nmax+"ants_"+max+"x"+max+"cells");
     if(stat(initDir.c_str(), &st) != 0){
+#ifdef _WIN32
+        _mkdir(initDir.c_str());
+#else
         mkdir(initDir.c_str(), 0775);
+#endif
     }
 
     std::string fnum = toString(MACRO_NUM_FOODS);
 
     std::string fNumDir(initDir+"/"+fnum+"foodnum");
     if(stat(fNumDir.c_str(), &st) != 0){
+#ifdef _WIN32
+        _mkdir(fNumDir.c_str());
+#else
         mkdir(fNumDir.c_str(), 0775);
+#endif
     }
 
     std::string fsource = toString(MACRO_FOODSOURCE);
@@ -98,7 +106,11 @@ void IOInit(){
 
     std::string fCondDir(fNumDir+"/"+fsource+"initfvol_"+fdist+"fdist");
     if(stat(fCondDir.c_str(), &st) != 0){
+#ifdef _WIN32
+        _mkdir(fCondDir.c_str());
+#else
         mkdir(fCondDir.c_str(), 0775);
+#endif
     }
 
     std::string step = toString(MACRO_MAX_STEP);
@@ -106,7 +118,11 @@ void IOInit(){
 
     std::string stepAngleDir(fCondDir+"/"+step+"steps_"+angle+"deg");
     if(stat(stepAngleDir.c_str(), &st) != 0){
+#ifdef _WIN32
+        _mkdir(stepAngleDir.c_str());
+#else
         mkdir(stepAngleDir.c_str(), 0775);
+#endif
     }
 
     path = std::string(stepAngleDir+"/");
