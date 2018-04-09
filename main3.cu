@@ -18,8 +18,7 @@
 #include "Constants.h"
 #include "DataStructures.h"
 #include "Variables.h"
-// #include "kernel2.h"
-#include "kernel.h"
+#include "kernel3.h"
 #include "Display.h"
 #include "IO.h"
 

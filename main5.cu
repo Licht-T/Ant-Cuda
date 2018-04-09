@@ -18,10 +18,9 @@
 #include "Constants.h"
 #include "DataStructures.h"
 #include "Variables.h"
-// #include "kernel2.h"
-#include "kernel.h"
+#include "kernel5.h"
 #include "Display.h"
-#include "IO.h"
+#include "IO5.h"
 
 int main(int argc, char *argv[]){
 
