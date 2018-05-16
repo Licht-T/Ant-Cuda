@@ -1,9 +1,9 @@
 # Diverse Stochasticity Leads a Colony of Ants to Optimal Foraging
 
-A foraging ants multi-agent simulation software of the following publications.
+A foraging ants multi-agent simulation software used in the following publication.
 
-## Publications
-- Masashi Shiraishi, Rito Takeuchi, Hiroyuki Nakagawa, Tomomi Tao, Shin I Nishimura, Akinori Awazu, and Hiraku Nishimori, "Diverse Stochasticity Leads a Colony of Ants to Optimal Foraging", (2018).
+## Publication
+- Masashi Shiraishi, Rito Takeuchi, Hiroyuki Nakagawa, Tomomi Tao, Shin I Nishimura, Akinori Awazu, and Hiraku Nishimori, "Diverse Stochasticity Leads a Colony of Ants to Optimal Foraging", [arXiv:1805.05598](https://arxiv.org/abs/1805.05598), 2018.
 
 ## Requirements
 - Ubuntu >= 17.04 or Windows >= 7
