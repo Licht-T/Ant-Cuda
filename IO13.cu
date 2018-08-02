@@ -1,4 +1,4 @@
-#include "IO4.h"
+#include "IO13.h"
 
 int pw_old;
 
@@ -6,7 +6,9 @@ const std::string constHeader("Constants.h");
 std::string path;
 std::string fool_num_plot;
 std::ofstream *ofs;
-std::string fool_num_food;
+std::string fool_num_plot_prob;
+std::ofstream *ofsProb;
+//std::string fool_num_food;
 std::ofstream *ofsfood;
 
 template <int max> struct getHomingFood{
@@ -128,9 +130,13 @@ void IOInit(){
     }
 
     path = std::string(stepAngleDir+"/");
-    fool_num_plot = std::string(path+step+"steps_"+angle+"deg.dat");
+    std::string rec = toString(MACRO_REC);
+    fool_num_plot = std::string(path+step+"steps_"+angle+"deg_"+rec+"rec.dat");
 
     ofs = new std::ofstream(fool_num_plot.c_str());
+
+    fool_num_plot_prob = std::string(path+step+"steps_"+angle+"deg_"+rec+"rec_prob.dat");
+    ofsProb = new std::ofstream(fool_num_plot_prob.c_str());
 
     std::ifstream constifs(constHeader.c_str());
     std::ofstream constofs((path+constHeader).c_str());
@@ -138,7 +144,7 @@ void IOInit(){
 
 
     fool_num_food = std::string(path+step+"steps_"+angle+"deg_food.dat");
-    ofsfood = new std::ofstream(fool_num_food.c_str());
+    //ofsfood = new std::ofstream(fool_num_food.c_str());
 }
 
 void IOEffWrite(int pw, int n, double sum){
@@ -149,6 +155,21 @@ void IOEffWrite(int pw, int n, double sum){
     (*ofs)  << pw << " "
         << n  << " "
         << (sum/(MACRO_MAX_STEP))/(MACRO_MAX_TIME-1000)
+        << std::endl;
+}
+
+void IOProbWrite(int pw, int n, double prob[]){
+    if(pw_old<pw){
+        pw_old = pw;
+        (*ofsProb) << std::endl;
+    }
+    (*ofsProb)  << pw << " "
+        << n  << " "
+        << ((double)prob[0]/(MACRO_MAX_STEP))/(MACRO_MAX_TIME) << " "
+        << ((double)prob[1]/(MACRO_MAX_STEP))/(MACRO_MAX_TIME) << " "
+        << ((double)prob[2]/(MACRO_MAX_STEP))/(MACRO_MAX_TIME) << " "
+        << ((double)prob[3]/(MACRO_MAX_STEP))/(MACRO_MAX_TIME) << " "
+        << ((double)prob[4]/(MACRO_MAX_STEP))/(MACRO_MAX_TIME)
         << std::endl;
 }
 
@@ -170,7 +191,6 @@ void IOFoodWrite(int pw, int n, double ft[], double et[]){
     }
     (*ofsfood)  << pw << " " << n  << " ";
 
-    // Mean
     for(int id=0; id<MACRO_NUM_FOODS; id++)
         (*ofsfood) << ft[id]/(MACRO_MAX_STEP) << " ";
 
@@ -185,26 +205,20 @@ void IOFoodWrite(int pw, int n, double ft[], double et[]){
         for(int id2=id+1; id2<MACRO_NUM_FOODS; id2++)
             (*ofsfood) << (et[id] - et[id2])/(MACRO_MAX_STEP) << " ";
 
-    // Variance
-    for(int id=0; id<MACRO_NUM_FOODS; id++)
-      (*ofsfood) << (et[id+2] / MACRO_MAX_STEP) << " ";
-
-    for(int id=0; id<MACRO_NUM_FOODS; id++)
-      (*ofsfood) << (ft[id+2] / MACRO_MAX_STEP) - (et[id+2]*et[id+2])/(MACRO_MAX_STEP*MACRO_MAX_STEP) << " ";
-
     (*ofsfood) << std::endl;
 }
 
-void IOFoodAmountWrite(std::ofstream & ofs, std::vector< std::vector<double> > & ft){
+//void IOFoodAmountWrite(std::ofstream & ofs, std::vector< std::vector<double> > & ft){
+void IOFoodAmountWrite(std::ofstream & ofs, double ft[][MACRO_NUM_FOODS]){
     // if(pw_old<pw){
     //     pw_old = pw;
     //     (*ofs) << std::endl;
     // }
 
     for(int t=0; t<MACRO_MAX_TIME; t++){
-        (ofs)  << t << "\t" ;
+        (ofs)  << t ;
         for(int id=0; id<MACRO_NUM_FOODS; id++)
-            (ofs) << ft[t][id] << "\t";
+            (ofs) << "\t" << ft[t][id] ;
         (ofs) << std::endl;
     }
 }

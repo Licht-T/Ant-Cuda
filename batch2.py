@@ -9,20 +9,22 @@ dists = [50,]
 #angles = [150, 180]
 #angles = [120, 150, 180]
 #angles = [10, 90]
-angles = [10,]
-#angles = [10, 45, 90]
+#angles = [45,]
+angles = [10, 45, 90]
 #angles = [10, 45, 90, 135, 180]
 #angles = [10, 30, 45, 60, 90, 120, 135, 150, 180]
 #angles = [5, 15, 20, 25, 35, 40, 50, 55, 65, 70, 75, 80, 85, 95, 100, 105, 110, 115]
 #frecs = [0.9, 1.2, 1.4, 1.6, 1.8, 0.001]
-frecs = [0.1,]
-#frecs = [0.1, 0.8, 2.0]
+#frecs = [0.1,]
+frecs = [0.1, 0.8, 2.0]
 #frecs = [0.01,]
 #frecs = [0.05, 0.2, 0.5, 0.6, 0.7]
 #frecs = [0.9, 3.0]
 #frecs = [0.1, 0.8, 2.0, 0.4, 1.0]
 #frecs = [0.1, 0.4, 0.8, 1.0 , 2.0]
 #frecs = [0.1, 0.2, 0.4, 0.8, 1.0 , 1.5, 2.0]
+amounts = [30,]
+#amounts = [5,15]
 
 flag_win = False
 try:
@@ -32,16 +34,28 @@ except AttributeError:
 
 if flag_win:
     make_cmd = "mingw32-make"
-
 for dist in dists:
-    for frec in frecs:
-        for angle in angles:
-            args = [make_cmd, "--file=makefile2", "ANGLE="+str(angle), "DIST="+str(dist), "FREC="+str(frec)]
+    for angle in angles:
+        for amount in amounts:
+            args = [make_cmd, "--file=makefile2", "ANGLE="+str(angle), "DIST="+str(dist), "AMOUNT="+str(amount)]
             subprocess.call(args)
 
-    for frec in frecs:
-        for angle in angles:
-            subprocess.call("./{0}dist_{1}deg_{2}rec.exe".format(dist, angle, frec))
-            print("{0}dist, {1}deg. {2}rec. ended.".format(dist, angle, frec))
+    for angle in angles:
+        for amount in amounts:
+            subprocess.call("./{2}food_{0}dist_{1}deg.exe".format(dist, angle, amount))
+            print("{2}food, {0}dist, {1}deg. ended.".format(dist, angle, amount))
+
+    # subprocess.call([make_cmd, "clean"])
+
+# for dist in dists:
+#     for frec in frecs:
+#         for angle in angles:
+#             args = [make_cmd, "--file=makefile2", "ANGLE="+str(angle), "DIST="+str(dist), "FREC="+str(frec)]
+#             subprocess.call(args)
+
+#     for frec in frecs:
+#         for angle in angles:
+#             subprocess.call("./{0}dist_{1}deg_{2}rec.exe".format(dist, angle, frec))
+#             print("{0}dist, {1}deg. {2}rec. ended.".format(dist, angle, frec))
 
     # subprocess.call([make_cmd, "clean"])

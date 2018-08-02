@@ -29,23 +29,30 @@ else
 endif
 
 NVCC = nvcc
-#NVCCFLAGS = -O3 -arch sm_60 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
-NVCCFLAGS = -g -G -O3 -arch sm_35 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
+#NVCCFLAGS = -O3 -arch sm_35 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
+NVCCFLAGS = -O3 -arch sm_35 -DMACRO_FOODSOURCE=${AMOUNT} -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -D_FORCE_INLINES -w
+#NVCCFLAGS = -g -G -O3 -arch sm_35 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
 
 CC = cc
-CFLAGS = -g -G -O3 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
+#CFLAGS = -O3 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
+CFLAGS = -O3 -DMACRO_FOODSOURCE=${AMOUNT} -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -D_FORCE_INLINES -w
+#CFLAGS = -g -G -O3 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
 
 CXX = g++
-CXXFLAGS = -g -G -O3 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
+#CXXFLAGS = -O3 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
+CXXFLAGS = -O3 -DMACRO_FOODSOURCE=${AMOUNT} -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -D_FORCE_INLINES -w
+#CXXFLAGS = -g -G -O3 -DMACRO_FOOD_ANGLE=${ANGLE} -DMACRO_FOOD_DIST=${DIST} -DMACRO_REC=${FREC} -D_FORCE_INLINES -w
 
 LD = nvcc
 #LDFLAGS = -arch sm_60
 LDFLAGS = -arch sm_35
 
-TARGET = ${DIST}dist_${ANGLE}deg_${FREC}rec.exe
+#TARGET = ${DIST}dist_${ANGLE}deg_${FREC}rec.exe
+TARGET = ${AMOUNT}food_${DIST}dist_${ANGLE}deg.exe
 #CUSOURCES = main.cu IO.cu DataStructures.cu Variables.cu kernel.cu Display.cu
 #CUSOURCES = main2.cu IO2.cu DataStructures.cu Variables.cu kernel2.cu Display.cu
 #CUSOURCES = main3.cu IO.cu DataStructures.cu Variables.cu kernel3.cu Display.cu
+#CUSOURCES = main4.cu IO4.cu DataStructures.cu Variables.cu kernel4.cu Display.cu
 #CUSOURCES = main5.cu IO5.cu DataStructures.cu Variables.cu kernel5.cu Display.cu
 #CUSOURCES = main6.cu IO6.cu DataStructures.cu Variables.cu kernel6.cu Display.cu
 #CUSOURCES = main7.cu IO7.cu DataStructures.cu Variables.cu kernel7.cu Display.cu
@@ -53,7 +60,8 @@ TARGET = ${DIST}dist_${ANGLE}deg_${FREC}rec.exe
 #CUSOURCES = main9.cu IO9.cu DataStructures.cu Variables.cu kernel9.cu Display.cu
 #CUSOURCES = main10.cu IO10.cu DataStructures2.cu Variables2.cu kernel10.cu Display10.cu
 #CUSOURCES = main11.cu IO11.cu DataStructures2.cu Variables3.cu kernel11.cu Display11.cu
-CUSOURCES = main12.cu IO12.cu DataStructures.cu Variables.cu kernel12.cu Display12.cu
+#CUSOURCES = main12.cu IO12.cu DataStructures.cu Variables.cu kernel12.cu Display12.cu
+CUSOURCES = main13.cu IO13.cu DataStructures13.cu Variables13.cu kernel13.cu Display13.cu
 CSOURCES =
 CXXSOURCES =
 
@@ -62,6 +70,7 @@ ifeq ($(OS),Windows_NT)
 else
 	OBJECTS = ${CUSOURCES:.cu=.o} ${CSOURCES:.cu=.o} ${CXXSOURCES:.cpp=.o}
 endif
+
 
 .SUFFIXES: .cu .c .cpp .o .obj
 

@@ -60,7 +60,7 @@ int main(int argc, char *argv[]){
             foodspre[id] = MACRO_FOODSOURCE;
         for(int t=0; t<MACRO_MAX_TIME; t++){
             calculation();
-            cudaMemcpyFromSymbol(&foods, foods_d, sizeof(Food)*MACRO_NUM_FOODS);
+            cudaMemcpyFromSymbol(foods, foods_d, sizeof(Food)*MACRO_NUM_FOODS);
             for (int id=0; id<MACRO_NUM_FOODS; id++){
                 if( foods[id].vol < foodspre[id] + MACRO_REC ){
                     access[id] = 1;
@@ -109,9 +109,9 @@ int main(int argc, char *argv[]){
                 for (int id=0; id<MACRO_NUM_FOODS; id++)
                     foodspre[id] = MACRO_FOODSOURCE;
 
-                for(int t=1; t<=MACRO_MAX_TIME; t++){
+                for(int t=0; t<MACRO_MAX_TIME; t++){
                     calculation();
-                    cudaMemcpyFromSymbol(&foods, foods_d, sizeof(Food)*MACRO_NUM_FOODS);
+                    cudaMemcpyFromSymbol(foods, foods_d, sizeof(Food)*MACRO_NUM_FOODS);
 
                     for (int id=0; id<MACRO_NUM_FOODS; id++){
                         if( foods[id].vol < foodspre[id] + MACRO_REC ){

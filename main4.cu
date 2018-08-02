@@ -31,11 +31,13 @@ int main(int argc, char *argv[]){
 
     initialize();
 
-    double normalEndTime[MACRO_NUM_FOODS]; // 有限量の餌を採り尽くす時間
-    double normalFindTime[MACRO_NUM_FOODS]; // 有限量の餌を採り尽くす時間
+    double normalEndTime[MACRO_NUM_FOODS*2]; // 有限量の餌を採り尽くす時間
+    double normalFindTime[MACRO_NUM_FOODS*2]; // 有限量の餌を採り尽くす時間
     for (int id=0; id<MACRO_NUM_FOODS; id++){
         normalEndTime[id] = 0;
         normalFindTime[id] = 0;
+        normalEndTime[id+2] = 0;
+        normalFindTime[id+2] = 0;
     }
     double normalSum = 0.0;
 
@@ -98,6 +100,8 @@ int main(int argc, char *argv[]){
         for (int id=0; id<MACRO_NUM_FOODS; id++){
             normalEndTime[id] += EndTime[id];
             normalFindTime[id] += FindTime[id];
+            normalEndTime[id+2] += EndTime[id]*EndTime[id];
+            normalFindTime[id+2] += FindTime[id]*FindTime[id];
         }
 
         normalSum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, homeOp, 0, binary_op);
@@ -116,11 +120,13 @@ int main(int argc, char *argv[]){
             int naho = (MACRO_NMAX - n);
 
             double sum = 0.0;
-            double EndTimeAve[MACRO_NUM_FOODS];
-            double FindTimeAve[MACRO_NUM_FOODS];
+            double EndTimeAve[MACRO_NUM_FOODS*2];
+            double FindTimeAve[MACRO_NUM_FOODS*2];
             for (int id=0; id<MACRO_NUM_FOODS; id++){
                 EndTimeAve[id] = 0;
                 FindTimeAve[id] = 0;
+                EndTimeAve[id+2] = 0;
+                FindTimeAve[id+2] = 0;
             }
             for(unsigned long long int dummy=1; dummy<=MACRO_MAX_STEP; dummy++){
                 int FindTime[MACRO_NUM_FOODS]; // 有限量の餌を見つける時間
@@ -170,6 +176,8 @@ int main(int argc, char *argv[]){
                 for (int id=0; id<MACRO_NUM_FOODS; id++){
                     EndTimeAve[id] += EndTime[id];
                     FindTimeAve[id] += FindTime[id];
+                    EndTimeAve[id+2] += EndTime[id] - FindTime[id];
+                    FindTimeAve[id+2] += (EndTime[id] - FindTime[id])*(EndTime[id] - FindTime[id]);
                 }
                 sum += thrust::transform_reduce(ants_d_ptr, ants_d_ptr+MACRO_NMAX, homeOp, 0, binary_op);
             }
