@@ -378,7 +378,7 @@ __global__ void pheroUpdate(){
 __global__ void naturalFoodDecrease(){
     const int id = threadIdx.x + blockIdx.x * blockDim.x;
     // 常に一定量で増加する。
-    foods_d[id].vol = foods_d[id].vol + MACRO_REC;
+    foods_d[id].vol = ( foods_d[id].vol + 1.0 ) * MACRO_REC;
     if (foods_d[id].vol > 100.0)
         foods_d[id].vol = 100.0;
 }

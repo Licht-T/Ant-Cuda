@@ -11,8 +11,8 @@
 #include <thrust/copy.h>
 
 #include "Constants.h"
-#include "DataStructures13.h"
-#include "Variables13.h"
+#include "DataStructures.h"
+#include "Variables.h"
 
 
 __host__ void initialize();

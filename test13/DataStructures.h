@@ -62,7 +62,6 @@ typedef struct {
     enum AntCharacter ch;
     int homing[MACRO_NUM_FOODS];
     int _foodNo;
-    double alpha;
 } Ant;
 
 

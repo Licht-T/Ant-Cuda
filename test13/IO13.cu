@@ -8,7 +8,7 @@ std::string fool_num_plot;
 std::ofstream *ofs;
 std::string fool_num_plot_prob;
 std::ofstream *ofsProb;
-//std::string fool_num_food;
+std::string fool_num_food;
 std::ofstream *ofsfood;
 
 template <int max> struct getHomingFood{
@@ -143,8 +143,8 @@ void IOInit(){
     constofs << constifs.rdbuf() << std::flush;
 
 
-    fool_num_food = std::string(path+step+"steps_"+angle+"deg_food.dat");
-    //ofsfood = new std::ofstream(fool_num_food.c_str());
+    // fool_num_food = std::string(path+step+"steps_"+angle+"deg_food.dat");
+    // ofsfood = new std::ofstream(fool_num_food.c_str());
 }
 
 void IOEffWrite(int pw, int n, double sum){
@@ -208,17 +208,16 @@ void IOFoodWrite(int pw, int n, double ft[], double et[]){
     (*ofsfood) << std::endl;
 }
 
-//void IOFoodAmountWrite(std::ofstream & ofs, std::vector< std::vector<double> > & ft){
-void IOFoodAmountWrite(std::ofstream & ofs, double ft[][MACRO_NUM_FOODS]){
+void IOFoodAmountWrite(std::ofstream & ofs, std::vector< std::vector<double> > & ft){
     // if(pw_old<pw){
     //     pw_old = pw;
     //     (*ofs) << std::endl;
     // }
 
     for(int t=0; t<MACRO_MAX_TIME; t++){
-        (ofs)  << t ;
+        (ofs)  << t << "\t" ;
         for(int id=0; id<MACRO_NUM_FOODS; id++)
-            (ofs) << "\t" << ft[t][id] ;
+            (ofs) << ft[t][id] << "\t";
         (ofs) << std::endl;
     }
 }
