@@ -3,7 +3,7 @@
 A foraging ants multi-agent simulation software used in the following publication.
 
 ## Publication
-- Masashi Shiraishi, Rito Takeuchi, Hiroyuki Nakagawa, Tomomi Tao, Shin I Nishimura, Akinori Awazu, and Hiraku Nishimori, "Diverse Stochasticity Leads a Colony of Ants to Optimal Foraging", [arXiv:1805.05598](https://arxiv.org/abs/1805.05598), 2018.
+- Masashi Shiraishi, Rito Takeuchi, Hiroyuki Nakagawa, Shin I Nishimura, Akinori Awazu, and Hiraku Nishimori, "Diverse Stochasticity Leads a Colony of Ants to Optimal Foraging", [Journal of Theoretical Biology](https://doi.org/10.1016/j.jtbi.2019.01.002), 2019.
 
 ## Requirements
 - Ubuntu >= 17.04 or Windows >= 7
